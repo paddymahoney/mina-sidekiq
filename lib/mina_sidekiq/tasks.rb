@@ -44,6 +44,10 @@ set_default :sidekiq_timeout, 11
 # Sets the path to the configuration file of sidekiq
 set_default :sidekiq_config, lambda { "#{deploy_to}/#{current_path}/config/sidekiq.yml" }
 
+# ### sidekiq_require
+# Sets the path to the required file of sidekiq
+set_default :sidekiq_require, lambda { "#{deploy_to}/#{current_path}/app.rb" }
+
 # ### sidekiq_log
 # Sets the path to the log file of sidekiq
 #
@@ -114,7 +118,7 @@ namespace :sidekiq do
     for_each_process do |pid_file, idx|
       queue %{
         cd "#{deploy_to}/#{current_path}"
-        #{echo_cmd %[#{sidekiq} -d -e #{rails_env} -C #{sidekiq_config} -c #{sidekiq_concurrency} -i #{idx} -P #{pid_file} -L #{sidekiq_log}] }
+        #{echo_cmd %[#{sidekiq} --require #{sidekiq_require} -d -e #{rails_env} -C #{sidekiq_config} -c #{sidekiq_concurrency} -i #{idx} -P #{pid_file} -L #{sidekiq_log}] }
       }
     end
   end
